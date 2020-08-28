@@ -29,7 +29,7 @@ AWS CloudFormation provides a common language for you to model and provision AWS
 ```bash
 aws cloudformation validate-template --template-body files:///home/YOUR_ID/YOUR_PATH/cfn_YOUR_STACK.yaml
 ```
-- [AWS CloudFormation Best Practices](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/best-practices.html
+- [AWS CloudFormation Best Practices](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/best-practices.html)
 - [AWS CloudFormation Template Reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-reference.html)
 - [CFN lint for VSCode](https://github.com/awslabs/aws-cfn-lint-visual-studio-code)
 - [Use AWS CloudFormer to create CloudFormation Template](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-cloudformer.html)
