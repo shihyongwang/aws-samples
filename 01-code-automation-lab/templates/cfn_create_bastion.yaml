@@ -1,0 +1,251 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+
+Description: "create bastion host within ASG."
+
+
+Metadata:
+  Authors:
+    Description:  Shih-Yong Wang
+
+  Purpose:
+    Description: >
+      "create bastion host within Auto Scaling Group."
+
+
+Parameters:
+  VpcId:
+    Description: What VPC would you like to associate with your Bastion Host?
+    Type: AWS::EC2::VPC::Id
+
+  AmiId:
+    Description: Static reference to latest Amazon Linux 2 AMI (`gp2' is SSD friendly)
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+    AllowedValues:
+      - '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+
+  KeyPair:
+    Description: Which Key Pair would you like to use for remote access?
+    Type: 'AWS::EC2::KeyPair::KeyName'
+
+  Subnet1:
+    Description: The first PUBLIC subnet associated with the Bastion Host Autoscaling Group
+    Type: 'AWS::EC2::Subnet::Id'
+
+  Subnet2:
+    Description: The second PUBLIC subnet associated with the Bastion Host Autoscaling Group
+    Type: 'AWS::EC2::Subnet::Id'
+
+  InstanceType:
+    Description: Instance size for the Bastion Host (default - t2.micro)
+    Type: String
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+      - t3.2xlarge
+    Default: t2.micro
+
+  SourceCidr:
+    Description: What is the CIDR Block of IPv4 IP addresses allowed to access your Bastion Host via SSH?
+    Type: String
+    AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/([0-9]|[1-2][0-9]|3[0-2]))?$"
+    ConstraintDescription: The value must be valid IPv4 CIDR block. (0.0.0.0/0 is NOT preferred)
+
+  SshPort:
+    Description: What port number would you like to use to connect to your Bastion Host over SSH?
+    Type: Number
+    Default: 22
+    MinValue: 22
+    MaxValue: 65535
+
+  DeployTimestamp:
+    Description: The date-like tag when deploy (say '20200707-v1')
+    Type: String
+
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Bastion Host Parameters"
+        Parameters:
+          - VpcId
+          - KeyPair
+          - AmiId
+          - Subnet1
+          - Subnet2
+          - InstanceType
+          - SourceCidr
+          - SshPort
+    ParameterLabels:
+      VpcId:
+        default: "VPC Id"
+      KeyPair:
+        default: "Key Pair"
+      AmiId:
+        default: "AMI"
+      Subnet1:
+        default: "Bastion Host at Public Subnet 1"
+      Subnet2:
+        default: "Bastion Host at Public Subnet 2"
+      InstanceType:
+        default: "Instance Type"
+      SourceCidr:
+        default: "Origin CIDR block"
+      SshPort:
+        default: "SSH Port Number"
+
+
+Resources:
+  BastionIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - codedeploy.amazonaws.com
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Description: based on https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-provision-user.html
+      Path: "/"
+      RoleName:
+        Fn::Join:
+        - ''
+        - - Ref: AWS::StackName
+          - "-bastion-role-"
+          - Ref: "DeployTimestamp"
+
+  ## https://github.com/awslabs/codedeploy-blue-green/blob/master/CDBlueGreen.yaml
+  BastionIamPolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Join:
+        - ''
+        - - Ref: AWS::StackName
+          - "-bastion-policy-"
+          - Ref: "DeployTimestamp"
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action:
+          - "autoscaling:*"
+          - "cloudformation:*"
+          - "codedeploy:*"
+          - "ec2:*"
+          - "ecs:*"
+          - "elasticloadbalancing:*"
+          - "iam:AddRoleToInstanceProfile"
+          - "iam:CreateInstanceProfile"
+          - "iam:CreateRole"
+          - "iam:DeleteInstanceProfile"
+          - "iam:DeleteRole"
+          - "iam:DeleteRolePolicy"
+          - "iam:GetInstanceProfile"
+          - "iam:GetRole"
+          - "iam:GetRolePolicy"
+          - "iam:ListInstanceProfilesForRole"
+          - "iam:ListRolePolicies"
+          - "iam:ListRoles"
+          - "iam:PassRole"
+          - "iam:PutRolePolicy"
+          - "iam:RemoveRoleFromInstanceProfile"
+          - "lambda:*"
+          - "s3:*"
+          - "ssm:*"
+          Resource: "*"
+      Roles:
+      - Ref: BastionIamRole
+
+  BastionInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName:
+        Fn::Join:
+        - ''
+        - - Ref: AWS::StackName
+          - "-bastion-instance-profile-"
+          - Ref: "DeployTimestamp"
+      Path: "/"
+      Roles:
+        - Ref: BastionIamRole
+
+  BastionLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      IamInstanceProfile: !Ref BastionInstanceProfile
+      ImageId: !Ref AmiId
+      InstanceMonitoring: true
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPair
+      LaunchConfigurationName: !Join ["-", [!Ref "AWS::StackName", "BastionHostLaunchConfiguration", !Ref "DeployTimestamp"]]
+      SecurityGroups:
+        - !Ref SecurityGroup
+
+  BastionASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: !Join ["-", [!Ref "AWS::StackName", "BastionHostASG", !Ref "DeployTimestamp"]]
+      LaunchConfigurationName: !Ref BastionLaunchConfig
+      MinSize: "1"
+      DesiredCapacity: "1"
+      MaxSize: "1"
+      MetricsCollection:
+        - Granularity: "1Minute"
+          Metrics:
+            - "GroupMinSize"
+            - "GroupMaxSize"
+      Tags:
+        - Key: "Name"
+          Value: !Join
+            - ''
+            - - !Ref "AWS::StackName"
+              - '-Bastion-'
+              - !Ref "DeployTimestamp"
+          PropagateAtLaunch: "true"
+      VPCZoneIdentifier:
+        - !Ref Subnet1
+        - !Ref Subnet2
+
+  ## https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Bastion Host Security Group
+      VpcId: !Ref VpcId
+      GroupName: !Join ["-", [ !Ref "AWS::StackName", "BastionHostSecurityGroup", !Ref "DeployTimestamp"]]
+      Tags:
+        -
+          Key: "Name"
+          Value: !Join
+            - ''
+            - - !Ref "AWS::StackName"
+              - '-sg-'
+              - !Ref "DeployTimestamp"
+
+  # Security Group Ingress rule for SSH access to Bastion Host
+  SecurityGroupSshIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Ref SourceCidr
+      FromPort: !Ref SshPort
+      GroupId: !Ref SecurityGroup
+      IpProtocol: "tcp"
+      ToPort: !Ref SshPort
+
+
+## @ref https://github.com/aws-quickstart/quickstart-linux-bastion/blob/master/templates/linux-bastion-master.template

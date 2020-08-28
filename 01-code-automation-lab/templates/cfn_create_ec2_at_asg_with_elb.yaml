@@ -1,0 +1,410 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+
+Description: "create EC2 instances with Auto Scaling Group and ELB."
+
+
+Metadata:
+  Authors:
+    Description:  Shih-Yong Wang
+
+  Purpose:
+    Description: >
+      "This is a sample template to create EC2 instances with Auto Scaling Group and ELB."
+
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Network parameters"
+        Parameters:
+          - VpcId
+          - PublicSubnet1
+          - PublicSubnet2
+          - PrivateSubnet1
+          - PrivateSubnet2
+      -
+        Label:
+          default: "EC2 instance parameters"
+        Parameters:
+          - KeyPair
+          - AmiId
+          - InstanceType
+          - EbsVolumeSize
+          - EbsVolumeType
+    ParameterLabels:
+      VpcId:
+        default: "VPC Id"
+      KeyPair:
+        default: "Key Pair"
+      AmiId:
+        default: "AMI"
+      PublicSubnet1:
+        default: "Load Balancer at Public Subnet 1"
+      PublicSubnet2:
+        default: "Load Balancer at Public Subnet 2"
+      PrivateSubnet1:
+        default: "EC2 Instance at Private Subnet 1"
+      PrivateSubnet2:
+        default: "EC2 Instance at Private Subnet 2"
+      InstanceType:
+        default: "Instance Type"
+      EbsVolumeSize:
+        default: "EBS Volume Size"
+      EbsVolumeType:
+        default: "EBS Volume Type"
+      DeployTimestamp:
+        default: "Date/version Tag"
+
+
+Parameters:
+  VpcId:
+    Description: What VPC would you like to associate with your EC2 instances.
+    Type: AWS::EC2::VPC::Id
+
+  PublicSubnet1:
+    Description: The first public subnet associated with the Load Balancer.
+    Type: 'AWS::EC2::Subnet::Id'
+
+  PublicSubnet2:
+    Description: The second public subnet associated with the Load Balancer.
+    Type: 'AWS::EC2::Subnet::Id'
+
+  PrivateSubnet1:
+    Description: The first private subnet associated with the EC2 Autoscaling Group.
+    Type: 'AWS::EC2::Subnet::Id'
+
+  PrivateSubnet2:
+    Description: The second private subnet associated with the EC2 Autoscaling Group.
+    Type: 'AWS::EC2::Subnet::Id'
+
+  KeyPair:
+    Description: Which Key Pair would you like to use for remote access?
+    Type: 'AWS::EC2::KeyPair::KeyName'
+
+  AmiId:
+    Description: Static reference to AMI (The default is the latest Amazon Linux 2).
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-ebs'
+
+  InstanceType:
+    Description: Instance size for the EC2 instance (default - t3.small).
+    Type: String
+    AllowedValues: [t1.micro, t2.nano, t2.micro, t2.small, t2.medium, t2.large,
+      t3.nano, t3.micro, t3.small, t3.medium, t3.large, t3.xlarge, t3.2xlarge,
+      m1.small, m1.medium, m1.large, m1.xlarge,
+      m2.xlarge, m2.2xlarge, m2.4xlarge,
+      m3.medium, m3.large, m3.xlarge, m3.2xlarge,
+      m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge, m4.10xlarge,
+      c1.medium, c1.xlarge,
+      c3.large, c3.xlarge, c3.2xlarge, c3.4xlarge, c3.8xlarge,
+      c4.large, c4.xlarge, c4.2xlarge, c4.4xlarge, c4.8xlarge,
+      g2.2xlarge, g2.8xlarge,
+      r3.large, r3.xlarge, r3.2xlarge, r3.4xlarge, r3.8xlarge,
+      i2.xlarge, i2.2xlarge, i2.4xlarge, i2.8xlarge,
+      d2.xlarge, d2.2xlarge, d2.4xlarge, d2.8xlarge,
+      hi1.4xlarge, hs1.8xlarge,
+      cr1.8xlarge, cc2.8xlarge, cg1.4xlarge]
+    Default: t3.small
+
+  EbsVolumeSize:
+    Type: Number
+    Description: >
+      Specifies the size (in GiB) of Elastic Block Store (Amazon EBS) volume.
+    Default: '30'
+
+  EbsVolumeType:
+    Type: String
+    Description: Specifies the type of EBS volume.
+    Default: 'gp2'
+    AllowedValues:
+      - standard
+      - io1
+      - gp2
+      - sc1
+      - st1
+    ConstraintDescription: Must be a valid EBS volume type.
+
+  DeployTimestamp:
+    Description: The date-like tag when deploy (say '20200707-v1')
+    Type: String
+
+
+Resources:
+  Ec2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service: ec2.amazonaws.com
+      Policies:
+        - PolicyName: logs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:*
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
+
+  Ec2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref Ec2InstanceRole
+
+  AsgLaunchConfigForEc2s:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: false
+      BlockDeviceMappings: # /root volume
+        - DeviceName: /dev/xvda
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: True
+            VolumeSize: !Ref EbsVolumeSize
+            VolumeType: !Ref EbsVolumeType
+      EbsOptimized: True
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      ImageId: !Ref AmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPair
+      LaunchConfigurationName: !Join ["-", [!Ref "AWS::StackName", "AsgLaunchConfigForEc2s", !Ref "DeployTimestamp"]]
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+          yum install -y httpd mariadb-server
+          systemctl restart httpd
+          systemctl enable httpd
+          systemctl is-enabled httpd
+          # https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-linux.html
+          yum install -y ruby telnet
+          wget https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
+          chmod +x ./install
+          ./install auto
+          service codedeploy-agent restart
+
+  EC2sAsg:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: !Join ["-", [!Ref "AWS::StackName", "asg", !Ref "DeployTimestamp"]]
+      Cooldown: '60'
+      DesiredCapacity: "2"
+      HealthCheckGracePeriod: 300
+      LaunchConfigurationName: !Ref AsgLaunchConfigForEc2s
+      #LoadBalancerNames:
+      #  - Ref: "LoadBalancer"
+      MinSize: "2"
+      MaxSize: "4"
+      MetricsCollection:
+        - Granularity: "1Minute"
+          Metrics:
+            - "GroupMinSize"
+            - "GroupMaxSize"
+      Tags:
+        - Key: Name
+          Value: !Join ["-", [!Ref "AWS::StackName", "EC2", !Ref "DeployTimestamp"]]
+          PropagateAtLaunch: true
+        - Key: Environment
+          Value: Development
+          PropagateAtLaunch: "true"
+      TargetGroupARNs:
+        - !Ref DefaultTargetGroup
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MinInstancesInService: "1"
+        MaxBatchSize: "1"
+        PauseTime: "PT12M5S"
+        SuspendProcesses:
+          - HealthCheck
+          - ReplaceUnhealthy
+          - AZRebalance
+          - AlarmNotification
+          - ScheduledActions
+
+  ## LoadBalancerSecurityGroup
+  ## This is the security group for the instances created by the launch configuration.
+  ## Only ports 22 and 80 are needed.
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable access to web/app servers
+      GroupName: !Join ["-", [ !Ref "AWS::StackName", "elb_sg", !Ref "DeployTimestamp"]]
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 10.0.0.0/8
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: Name
+        Value:
+          !Join ["-", [ !Ref "AWS::StackName", "elb_sg", !Ref "DeployTimestamp"]]
+      VpcId: !Ref VpcId
+
+
+  ## BlueGrenApp - CodeDeploy application
+  BlueGreenApp:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: !Join ["-", [ !Ref "AWS::StackName", "codedeploy_app", !Ref "DeployTimestamp"]]
+
+  ## BlueGreenDG - CodeDeploy deployment group
+  ## https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codedeploy-deploymentgroup.html
+  ## per stackoverflow.com/questions/62533881 , CFN does not support Blue/Green deployments for EC2 platform.
+  BlueGreenDG:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref BlueGreenApp
+      DeploymentGroupName: !Join ["-", [ !Ref "AWS::StackName", "codedeploy_dg", !Ref "DeployTimestamp"]]
+      #DeploymentConfigName: CodeDeployDefault.LambdaCanary10Percent5Minutes
+      #DeploymentStyle:
+      #  DeploymentType: BLUE_GREEN
+      #  DeploymentOption: WITH_TRAFFIC_CONTROL
+      ServiceRoleArn: !GetAtt BlueGreenDeployRole.Arn
+
+
+  ## BlueGreenDeployRole: This is the role that will be used by the CodeDeploy service.
+  ## Its sole purpose is to provide access to the CodeDeploy service.
+  ## It is not used by the EC2 instances themselves.
+  BlueGreenDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - codedeploy.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+
+  BlueGreenInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - Ref: BlueGreenInstanceRole
+
+  BlueGreenInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforAWSCodeDeploy
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      IpAddressType: ipv4 # Valid values are: dualstack, ipv4. 'dualstack' means IPv4 and IPv4.
+      LoadBalancerAttributes:
+        - Key: routing.http2.enabled
+          Value: true
+      Name: !Join ["-", [ !Ref "AWS::StackName", "alb", !Ref "DeployTimestamp"]]
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+      Subnets:
+          - !Ref PublicSubnet1
+          - !Ref PublicSubnet2
+      Type: application
+
+  LoadBalancerListenerHTTP:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref DefaultTargetGroup
+
+  ## We define a default target group here, as this is a mandatory Parameters
+  ## when creating an Application Load Balancer Listener.
+  DefaultTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Join ["-", [ !Ref "AWS::StackName", "default-tg", !Ref "DeployTimestamp"]]
+      VpcId: !Ref VpcId
+      Port: 80
+      Protocol: HTTP
+      TargetType: instance
+
+  ## BlueGreenCLB
+  ## This is the load balancer that will be used to support the BlueGreen environment.
+  ## https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-elb.html
+#  BlueGreenCLB:
+#    Type: AWS::ElasticLoadBalancing::LoadBalancer
+#    Properties:
+#      ConnectionSettings:
+#        IdleTimeout: 1
+#      HealthCheck:
+#        HealthyThreshold: '2'
+#        Interval: '15'
+#        Target: TCP:80
+#        Timeout: '5'
+#        UnhealthyThreshold: '2'
+#      Listeners:
+#      - InstancePort: '80'
+#        InstanceProtocol: TCP
+#        LoadBalancerPort: '80'
+#        Protocol: TCP
+#      - InstancePort: '443'
+#        InstanceProtocol: TCP
+#        LoadBalancerPort: '443'
+#        Protocol: TCP
+#      Scheme: internet-facing
+#      SecurityGroups:
+#      - Ref: LoadBalancerSecurityGroup
+#      Subnets:
+#        - !Ref PrivateSubnet1
+#        - !Ref PrivateSubnet2
+#      CrossZone: 'true'
+#      Tags:
+#      - Key: Name
+#        Value:
+#          !Join ["-", [ !Ref "AWS::StackName", "elb", !Ref "DeployTimestamp"]]
+
+Outputs:
+  ElbDNS:
+    Description: ELBv2 DNS
+    Value:
+      'Fn::GetAtt':
+        - LoadBalancer
+        - DNSName
+
