@@ -25,6 +25,7 @@ AWS CloudFormation provides a common language for you to model and provision AWS
 - Create SG by only allowing traffic from 0.0.0.0/0 via port 80 and 443.
 - At this moment, there are always at least 2 instances online.
 - EC2 instances are created with EBS friendly.
+- In addition, this template also sets up an AWS CodeDeploy application and blue/green deployment group.
 
 ### Step by Step
 #### Network Layer
@@ -80,7 +81,8 @@ aws cloudformation validate-template --template-body files:///home/YOUR_ID/YOUR_
 - [Use AWS CloudFormer to create CloudFormation Template](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-cloudformer.html)
 - [Import Existing Resources into a CloudFormation Stack](https://aws.amazon.com/blogs/aws/new-import-existing-resources-into-a-cloudformation-stack/)
 
-### Free CFN Templates
+### Free CloudFormation Templates
+- [CloudFormation Guard](https://github.com/aws-cloudformation/cloudformation-guard)
 - [https://github.com/awslabs/aws-cloudformation-templates](https://github.com/awslabs/aws-cloudformation-templates)
 - [https://github.com/aws-cloudformation/awesome-cloudformation](https://github.com/aws-cloudformation/awesome-cloudformation)
 - [https://templates.cloudonaut.io/en/stable/](https://templates.cloudonaut.io/en/stable/)
