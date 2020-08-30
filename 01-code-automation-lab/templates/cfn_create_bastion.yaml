@@ -1,16 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 
-Description: "create bastion host within ASG."
+Description: "Create bastion host within ASG."
 
 
 Metadata:
   Authors:
-    Description:  Shih-Yong Wang
+    Description: Shih-Yong Wang
 
   Purpose:
     Description: >
-      "create bastion host within Auto Scaling Group."
+      "Create bastion host within Auto Scaling Group."
 
 
 Parameters:
@@ -30,11 +30,11 @@ Parameters:
     Type: 'AWS::EC2::KeyPair::KeyName'
 
   Subnet1:
-    Description: The first PUBLIC subnet associated with the Bastion Host Autoscaling Group
+    Description: The 1st PUBLIC subnet associated with the Bastion Host Autoscaling Group
     Type: 'AWS::EC2::Subnet::Id'
 
   Subnet2:
-    Description: The second PUBLIC subnet associated with the Bastion Host Autoscaling Group
+    Description: The 2nd PUBLIC subnet associated with the Bastion Host Autoscaling Group
     Type: 'AWS::EC2::Subnet::Id'
 
   InstanceType:
@@ -52,6 +52,9 @@ Parameters:
       - t3.large
       - t3.xlarge
       - t3.2xlarge
+      - t3a.micro
+      - t3a.small
+      - t3a.medium
     Default: t2.micro
 
   SourceCidr:
@@ -77,16 +80,21 @@ Metadata:
     ParameterGroups:
       -
         Label:
-          default: "Bastion Host Parameters"
+          default: "Network Parameters"
         Parameters:
           - VpcId
-          - KeyPair
-          - AmiId
           - Subnet1
           - Subnet2
           - InstanceType
           - SourceCidr
           - SshPort
+      -
+        Label:
+          default: "Host Parameters"
+        Parameters:
+          - KeyPair
+          - AmiId
+          - InstanceType
     ParameterLabels:
       VpcId:
         default: "VPC Id"
@@ -192,14 +200,18 @@ Resources:
       InstanceMonitoring: true
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyPair
-      LaunchConfigurationName: !Join ["-", [!Ref "AWS::StackName", "BastionHostLaunchConfiguration", !Ref "DeployTimestamp"]]
+      LaunchConfigurationName: !Join ["-", [!Ref "AWS::StackName", "BastionLaunchConfiguration", !Ref "DeployTimestamp"]]
       SecurityGroups:
         - !Ref SecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum install -y telnet tmux
 
   BastionASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      AutoScalingGroupName: !Join ["-", [!Ref "AWS::StackName", "BastionHostASG", !Ref "DeployTimestamp"]]
+      AutoScalingGroupName: !Join ["-", [!Ref "AWS::StackName", "BastionASG", !Ref "DeployTimestamp"]]
       LaunchConfigurationName: !Ref BastionLaunchConfig
       MinSize: "1"
       DesiredCapacity: "1"
@@ -227,7 +239,7 @@ Resources:
     Properties:
       GroupDescription: Bastion Host Security Group
       VpcId: !Ref VpcId
-      GroupName: !Join ["-", [ !Ref "AWS::StackName", "BastionHostSecurityGroup", !Ref "DeployTimestamp"]]
+      GroupName: !Join ["-", [ !Ref "AWS::StackName", "BastionSecurityGroup", !Ref "DeployTimestamp"]]
       Tags:
         -
           Key: "Name"

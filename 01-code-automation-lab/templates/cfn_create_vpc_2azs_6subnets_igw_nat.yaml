@@ -1,12 +1,12 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
 
-Description: "create VPC, AZ*2, subnet*6, IGW, NAT*2."
+Description: "Create VPC, AZ*2, subnet*6, IGW, NAT*2."
 
 
 Metadata:
   Authors:
-    Description:  Shih-Yong Wang
+    Description: Shih-Yong Wang
 
   Purpose:
     Description: >
@@ -376,6 +376,10 @@ Resources:
           Value:
             Ref: "AWS::StackName"
         -
+          Key: "Environment"
+          Value:
+            Ref: "MyEnvironment"
+        -
           Key: "Network"
           Value: "Public"
         -
@@ -423,6 +427,10 @@ Resources:
           Key: "Application"
           Value:
             Ref: "AWS::StackName"
+        -
+          Key: "Environment"
+          Value:
+            Ref: "MyEnvironment"
         -
           Key: "Name"
           Value: !Join
@@ -489,6 +497,10 @@ Resources:
       Domain: "vpc"
       Tags:
         -
+          Key: "Environment"
+          Value:
+            Ref: "MyEnvironment"
+        -
           Key: "Name"
           Value: !Join
             - ''
@@ -501,6 +513,10 @@ Resources:
     Properties:
       Domain: "vpc"
       Tags:
+        -
+          Key: "Environment"
+          Value:
+            Ref: "MyEnvironment"
         -
           Key: "Name"
           Value: !Join
@@ -520,6 +536,10 @@ Resources:
         Ref: "PublicSubnet1"
       Tags:
         -
+          Key: "Environment"
+          Value:
+            Ref: "MyEnvironment"
+        -
           Key: "Name"
           Value: !Join
             - ''
@@ -538,6 +558,10 @@ Resources:
         Ref: "PublicSubnet2"
       Tags:
         -
+          Key: "Environment"
+          Value:
+            Ref: "MyEnvironment"
+        -
           Key: "Name"
           Value: !Join
             - ''
@@ -550,6 +574,10 @@ Resources:
     Type: "AWS::EC2::RouteTable"
     Properties:
       Tags:
+        -
+          Key: "Environment"
+          Value:
+            Ref: "MyEnvironment"
         -
           Key: "Name"
           Value: !Join
@@ -564,6 +592,10 @@ Resources:
     Type: "AWS::EC2::RouteTable"
     Properties:
       Tags:
+        -
+          Key: "Environment"
+          Value:
+            Ref: "MyEnvironment"
         -
           Key: "Name"
           Value: !Join
