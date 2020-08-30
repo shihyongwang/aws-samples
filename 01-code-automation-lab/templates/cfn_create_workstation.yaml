@@ -1,0 +1,302 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+
+Description: "Create workstation host."
+
+
+Metadata:
+  Authors:
+    Description: Shih-Yong Wang
+
+  Purpose:
+    Description: >
+      "Create workstation host."
+
+
+Parameters:
+  VpcId:
+    Description: What VPC would you like to associate with your Workstation Host?
+    Type: AWS::EC2::VPC::Id
+
+  AmiId:
+    Description: Static reference to AMI (The default is the latest Amazon Linux 2).
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-ebs'
+
+  KeyPair:
+    Description: Which Key Pair would you like to use for remote access?
+    Type: 'AWS::EC2::KeyPair::KeyName'
+
+  PrivateSubnet1:
+    Description: The first PRIVATE subnet associated with the Workstation Host
+    Type: 'AWS::EC2::Subnet::Id'
+
+  PrivateSubnet2:
+    Description: The first PRIVATE subnet associated with the Workstation Host
+    Type: 'AWS::EC2::Subnet::Id'
+
+  InstanceType:
+    Description: Instance size for the Workstation Host (default - t3a.micro)
+    Type: String
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+      - t3.2xlarge
+      - t3a.micro
+      - t3a.small
+      - t3a.medium
+    Default: t3a.micro
+
+  SourceCidr:
+    Description: What is the CIDR Block of IPv4 IP addresses allowed to access your workstation SSH?
+    Type: String
+    AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/([0-9]|[1-2][0-9]|3[0-2]))?$"
+    ConstraintDescription: The value must be valid IPv4 CIDR block. (0.0.0.0/0 is NOT preferred)
+    Default: 10.0.0.0/8
+
+  SshPort:
+    Description: What port number would you like to use to connect to your host over SSH?
+    Type: Number
+    Default: 22
+    MinValue: 22
+    MaxValue: 65535
+
+  EbsVolumeSize:
+    Type: Number
+    Description: >
+      Specifies the size (in GiB) of Elastic Block Store (Amazon EBS) volume.
+    Default: '30'
+
+  EbsVolumeType:
+    Type: String
+    Description: Specifies the type of EBS volume.
+    Default: 'gp2'
+    AllowedValues:
+      - standard
+      - io1
+      - gp2
+      - sc1
+      - st1
+    ConstraintDescription: Must be a valid EBS volume type.
+
+  DeployTimestamp:
+    Description: The date-like tag when deploy (say '20200707-v1')
+    Type: String
+
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Network Parameters"
+        Parameters:
+          - VpcId
+          - PrivateSubnet1
+          - PrivateSubnet2
+          - SourceCidr
+          - SshPort
+      -
+        Label:
+          default: "Workstation Host Parameters"
+        Parameters:
+          - KeyPair
+          - AmiId
+          - InstanceType
+          - EbsVolumeSize
+          - EbsVolumeType
+    ParameterLabels:
+      VpcId:
+        default: "VPC Id"
+      KeyPair:
+        default: "Key Pair"
+      AmiId:
+        default: "AMI"
+      PrivateSubnet1:
+        default: "Workstation Host at Private Subnet"
+      PrivateSubnet2:
+        default: "Workstation Host at Public Subnet 2"
+      InstanceType:
+        default: "Instance Type"
+      EbsVolumeSize:
+        default: "EBS Volume Size"
+      EbsVolumeType:
+        default: "EBS Volume Type"
+      SourceCidr:
+        default: "Origin CIDR block"
+      SshPort:
+        default: "SSH Port Number"
+
+
+Resources:
+  WorkstationIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - codedeploy.amazonaws.com
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Description: based on https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-provision-user.html
+      Path: "/"
+      RoleName:
+        Fn::Join:
+        - ''
+        - - Ref: AWS::StackName
+          - "-workstation-role-"
+          - Ref: "DeployTimestamp"
+
+  ## https://github.com/awslabs/codedeploy-blue-green/blob/master/CDBlueGreen.yaml
+  WorkstationIamPolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName:
+        Fn::Join:
+        - ''
+        - - Ref: AWS::StackName
+          - "-workstation-policy-"
+          - Ref: "DeployTimestamp"
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action:
+          - "autoscaling:*"
+          - "cloudformation:*"
+          - "codedeploy:*"
+          - "ec2:*"
+          - "ecs:*"
+          - "elasticloadbalancing:*"
+          - "iam:AddRoleToInstanceProfile"
+          - "iam:CreateInstanceProfile"
+          - "iam:CreateRole"
+          - "iam:DeleteInstanceProfile"
+          - "iam:DeleteRole"
+          - "iam:DeleteRolePolicy"
+          - "iam:GetInstanceProfile"
+          - "iam:GetRole"
+          - "iam:GetRolePolicy"
+          - "iam:ListInstanceProfilesForRole"
+          - "iam:ListRolePolicies"
+          - "iam:ListRoles"
+          - "iam:PassRole"
+          - "iam:PutRolePolicy"
+          - "iam:RemoveRoleFromInstanceProfile"
+          - "lambda:*"
+          - "s3:*"
+          - "ssm:*"
+          Resource: "*"
+      Roles:
+      - Ref: WorkstationIamRole
+
+  WorkstationInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName:
+        Fn::Join:
+        - ''
+        - - Ref: AWS::StackName
+          - "-workstation-instance-profile-"
+          - Ref: "DeployTimestamp"
+      Path: "/"
+      Roles:
+        - Ref: WorkstationIamRole
+
+  WorkstationLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: false
+      BlockDeviceMappings: # /root volume
+        - DeviceName: /dev/xvda
+          Ebs:
+            DeleteOnTermination: true
+            Encrypted: True
+            VolumeSize: !Ref EbsVolumeSize
+            VolumeType: !Ref EbsVolumeType
+      #EbsOptimized: True
+      IamInstanceProfile: !Ref WorkstationInstanceProfile
+      ImageId: !Ref AmiId
+      InstanceMonitoring: true
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPair
+      LaunchConfigurationName: !Join ["-", [!Ref "AWS::StackName", "WorkstationLaunchConfiguration", !Ref "DeployTimestamp"]]
+      SecurityGroups:
+        - !Ref SecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          amazon-linux-extras install -y php7.2 lamp-mariadb10.2-php7.2
+          yum install -y telnet git
+          yum install -y httpd mariadb-server
+          systemctl restart httpd
+          systemctl enable httpd
+          #systemctl is-enabled httpd
+          ## https://docs.aws.amazon.com/codedeploy/latest/userguide/codedeploy-agent-operations-install-linux.html
+          #yum install -y ruby
+          #wget https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
+          #chmod +x ./install
+          #./install auto
+          #service codedeploy-agent restart
+
+  WorkstationASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: !Join ["-", [!Ref "AWS::StackName", "WorkstationHostASG", !Ref "DeployTimestamp"]]
+      LaunchConfigurationName: !Ref WorkstationLaunchConfig
+      MinSize: "1"
+      DesiredCapacity: "1"
+      MaxSize: "1"
+      MetricsCollection:
+        - Granularity: "1Minute"
+          Metrics:
+            - "GroupMinSize"
+            - "GroupMaxSize"
+      Tags:
+        - Key: "Name"
+          Value: !Join
+            - ''
+            - - !Ref "AWS::StackName"
+              - '-workstation-'
+              - !Ref "DeployTimestamp"
+          PropagateAtLaunch: "true"
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  ## https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Workstation Host Security Group
+      GroupName: !Join ["-", [ !Ref "AWS::StackName", "WorkstationHostSecurityGroup", !Ref "DeployTimestamp"]]
+      Tags:
+        -
+          Key: "Name"
+          Value: !Join
+            - ''
+            - - !Ref "AWS::StackName"
+              - '-sg-'
+              - !Ref "DeployTimestamp"
+      VpcId: !Ref VpcId
+
+  # Security Group Ingress rule for SSH access to Workstation Host
+  SecurityGroupSshIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Ref SourceCidr
+      FromPort: !Ref SshPort
+      GroupId: !Ref SecurityGroup
+      IpProtocol: "tcp"
+      ToPort: !Ref SshPort
+

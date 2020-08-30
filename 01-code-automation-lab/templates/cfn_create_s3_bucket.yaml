@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+
+Description: Create S3 Bucket
+
+
+Metadata:
+  Authors:
+    Description: Shih-Yong Wang
+
+  Purpose:
+    Description: >
+      "Create S3 bucket."
+
+  AWS::CloudFormation::Interface:
+    ParameterLabels:
+      BucketName:
+        default: S3 Bucket name
+      BucketNameForAccessLogs:
+        default: Access logs bucket
+
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: The name of the S3 Bucket to create (e.g., YOUR_NAME-YOUR_APP-dev-us-east-1)
+
+  BucketNameForAccessLogs:
+    Type: String
+    Description: The name of the S3 Bucket for access logs (e.g., YOUR_NAME-logs-dev-us-east-1)
+
+  DeployTimestamp:
+    Description: The date-like tag when deploy (say '20160707')
+    Type: String
+
+
+Resources:
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: BucketOwnerFullControl
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Ref BucketName
+      LifecycleConfiguration:
+        Rules:
+          - Id: MyCleanImcompleteMultiUploadRule
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 3
+            NoncurrentVersionExpirationInDays: 3
+            Status: Enabled
+          - Id: MyGlacierRule
+            Status: Enabled
+            ExpirationInDays: '365'
+            Transitions:
+              - TransitionInDays: '1'
+                StorageClass: GLACIER
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3BucketLogs
+        LogFilePrefix: !Sub '/logs/${BucketName}/'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        -
+          Key: Name
+          Value: !Join ["-", [!Ref "AWS::StackName", !Ref "DeployTimestamp"]]
+      VersioningConfiguration:
+        Status: Enabled
+
+  S3BucketLogs:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Ref BucketNameForAccessLogs
+      LifecycleConfiguration:
+        Rules:
+          - Id: MyCleanImcompleteMultiUploadRule
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+            Status: Enabled
+            Transitions:
+              -
+                StorageClass: GLACIER
+                TransitionInDays: 30
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        -
+          Key: Description
+          Value: S3 Access Logs
+        -
+          Key: Name
+          Value: !Join ["-", [!Ref "AWS::StackName", !Ref "DeployTimestamp"]]
+
+Outputs:
+
+  S3Bucket:
+    Value: !Ref S3Bucket
+    Description: S3 Bucket for object storage
+
+  S3BucketLogs:
+    Value: !Ref S3BucketLogs
+    Description: S3 Bucket for access logs
+
