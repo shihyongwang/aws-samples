@@ -2,9 +2,14 @@
 AWS CloudFormation provides a common language for you to model and provision AWS infrastructure resources. Check [the official site](https://aws.amazon.com/cloudformation/) for more information.
 
 ### Sample architecture on AWS
-![3 tiers on AWS - shihyong](https://user-images.githubusercontent.com/13880010/91629486-0d285980-e9fc-11ea-9438-4832ca533881.jpg)
+![3 tiers on AWS - shihyong](https://user-images.githubusercontent.com/13880010/91656797-201b5680-eaee-11ea-9529-c6b403477384.jpg)
 
-#### Network Layer
+#### Storage layer
+- Create a bucket for object storage
+- Create a bucket for access logs
+- Create Lifecycle to objects
+
+#### Network layer
 - Enable 2 AZs at the destination VPC.
 - Create 3 subnets at each AZ.
   - public subnets for bastion box, NAT gateway.
@@ -12,14 +17,14 @@ AWS CloudFormation provides a common language for you to model and provision AWS
   - private subnets for database.
 - Could create the 4th subnets for transit purpose (for safety manner)
 
-#### Bastion Layer
+#### Bastion layer
 - Instance type "t" should be enough. But Spot is not preferred.
 - A jump box could without EBS.
 - Protect the bastion with ASG to make sure there is always one box online.
 - Regarding the CIDR at SG, allow from corp NAT is preferred.
 - At this moment, this bastion would with permission to access such as S3, CodeDeploy, ECS, Lambda, etc.
 
-#### Application Layer
+#### Application layer
 - Create the ALB at public subnets. (CLB would be EOLed)
 - Create the ASG at private subnets,
 - Create SG by only allowing traffic from 0.0.0.0/0 via port 80 and 443.
@@ -27,8 +32,12 @@ AWS CloudFormation provides a common language for you to model and provision AWS
 - EC2 instances are created with EBS friendly.
 - In addition, this template also sets up an AWS CodeDeploy application and blue/green deployment group.
 
-### Step by Step
-#### Network Layer
+### Step by step
+#### Storage layer
+1. Go to `CloudFormation` (or URL: _https://console.aws.amazon.com/cloudformation/home?region=us-east-1_ ) to `Create stack`
+<img width="1010" alt="S3 bucket" src="https://user-images.githubusercontent.com/13880010/91656774-eba79a80-eaed-11ea-9905-7d016b81ec4e.png">
+
+#### Network layer
 1. Go to `CloudFormation` (or URL: _https://console.aws.amazon.com/cloudformation/home?region=us-east-1_ ) to `Create stack`
 <img width="1334" alt="Step 1" src="https://user-images.githubusercontent.com/13880010/91627400-a9953080-e9e9-11ea-9fd3-004bc9c41696.png">
 
@@ -45,7 +54,7 @@ AWS CloudFormation provides a common language for you to model and provision AWS
 <img width="989" alt="Outputs" src="https://user-images.githubusercontent.com/13880010/91628270-a2bdec00-e9f0-11ea-9c89-3be8ba449249.png">
 
 
-#### Bastion Layer
+#### Bastion layer
 1. At `Step 1`, specify stack details as 
 <img width="647" alt="Step 1" src="https://user-images.githubusercontent.com/13880010/91628013-48bc2700-e9ee-11ea-8a56-383917b9abd2.png">
 
@@ -54,7 +63,10 @@ AWS CloudFormation provides a common language for you to model and provision AWS
 
 3. This step might take about 4 minutes.
 
-#### Application Layer
+#### Workstation layer
+<img width="972" alt="Workstation" src="https://user-images.githubusercontent.com/13880010/91657019-59ed5c80-eaf0-11ea-808f-120ed502d3b9.png">
+
+#### Application layer
 1. At `Step 1`, specify stack details as 
 <img width="638" alt="Step 1" src="https://user-images.githubusercontent.com/13880010/91628382-d2b9bf00-e9f1-11ea-9ca5-ffe1db34d8a4.png">
 
