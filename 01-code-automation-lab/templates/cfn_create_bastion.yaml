@@ -85,7 +85,6 @@ Metadata:
           - VpcId
           - Subnet1
           - Subnet2
-          - InstanceType
           - SourceCidr
           - SshPort
       -

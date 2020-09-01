@@ -106,7 +106,7 @@ Metadata:
           - SshPort
       -
         Label:
-          default: "Workstation Host Parameters"
+          default: "Host Parameters"
         Parameters:
           - KeyPair
           - AmiId
@@ -121,9 +121,9 @@ Metadata:
       AmiId:
         default: "AMI"
       PrivateSubnet1:
-        default: "Workstation Host at Private Subnet"
+        default: "Workstation Host at Private Subnet 1"
       PrivateSubnet2:
-        default: "Workstation Host at Public Subnet 2"
+        default: "Workstation Host at Private Subnet 2"
       InstanceType:
         default: "Instance Type"
       EbsVolumeSize:
