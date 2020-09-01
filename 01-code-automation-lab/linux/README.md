@@ -1,17 +1,4 @@
-### Create AMI from golden server
-1. Make sure you have proper permission (via temporary credential or session token) to SSH from the Bastion box to the Workstation.
-<img width="802" alt="AWS Console" src="https://user-images.githubusercontent.com/13880010/91627016-a2205800-e9e6-11ea-8bb5-94f85cb75793.png">
-
-2. Run the CLI `aws` to build an AMI image.
-```bash
-$ aws ec2 create-image --instance-id i-YOUR_EC2_ID --name "sywang-golden-20200830" --description "Base AMI for CodeDeploy" --no-reboot
-```
-
-3. You will get the AMI ID from the output.
-
-4. You can check the image at `EC2` --> `AMIs` (or https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Images:sort=name )
-
-### Create your CodeDeploy pipeline
+## Create your CodeDeploy pipeline
 1. Read the [appspec.yml user guide](https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file.html) , event hooks at this case run in the following order:
 <img alt="CodeDeploy hook" src="https://docs.aws.amazon.com/codedeploy/latest/userguide/images/lifecycle-event-order-blue-green.png">
 
@@ -38,7 +25,8 @@ aws deploy create-deployment --application-name YOU_APP_NAME --s3-location bucke
 7. If you successed the deployment, you can check the ALB
 <img width="825" alt="Congratulations" src="https://user-images.githubusercontent.com/13880010/91654248-cf016780-ead9-11ea-82f3-c9a4346fa437.png">
 
-### Referendce
+## Reference
 - [Performing Blue/Green Deployments with AWS CodeDeploy and Auto Scaling Groups](https://aws.amazon.com/blogs/devops/performing-bluegreen-deployments-with-aws-codedeploy-and-auto-scaling-groups/)
 - [Automating Blue/Green Deployments of Infrastructure and Application Code](https://aws.amazon.com/blogs/devops/bluegreen-infrastructure-application-deployment-blog/)
 - [Under the Hood: AWS CodeDeploy and Auto Scaling Integration](https://aws.amazon.com/blogs/devops/under-the-hood-aws-codedeploy-and-auto-scaling-integration/)
+
