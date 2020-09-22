@@ -6,3 +6,5 @@ Here are some AWS CloudFormation teamplate samples
 - [https://github.com/aws-cloudformation/awesome-cloudformation](https://github.com/aws-cloudformation/awesome-cloudformation)
 - [https://templates.cloudonaut.io/en/stable/](https://templates.cloudonaut.io/en/stable/)
 
+## Tools
+- [AWS CloudFormation Linter](https://github.com/aws-cloudformation/cfn-python-lint)
