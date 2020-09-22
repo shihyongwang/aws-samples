@@ -78,7 +78,7 @@ At `Step 1`, specify stack details as
 ## Step by step to build the app cluster
 ### Build the Golden image
 1. login you `Bastion` instance, then just to the `Workstation` box.
-  - You have to convert your .pem file (private key) to .ppk if you are on Window's Putty.
+  - You have to convert your .pem file (private key) to .ppk if you are on Window's Putty. See [https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html#putty-private-key](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html#putty-private-key) for steps.
 
 2. Create file `.ssh/id_rsa` and put the *RSA PRIVATE KEY* into. Then `chmod 400 ~/.ssh/id_rsa`.
 <img width="661" alt="RSA PRIVATE KEY" src="https://user-images.githubusercontent.com/13880010/91800088-f59adc00-ec5a-11ea-8ae2-494f4a63e486.png">
