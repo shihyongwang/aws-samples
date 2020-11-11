@@ -122,6 +122,9 @@ aws cloudformation validate-template --template-body files:///home/YOUR_ID/YOUR_
 ```
 - [AWS CloudFormation Best Practices](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/best-practices.html)
 - [AWS CloudFormation Template Reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-reference.html)
+- [AWS CloudFormation Examples](https://github.com/tongueroo/cloudformation-examples)
+- [AWS CloudFormation Tutorial (Video)](https://www.youtube.com/watch?v=t97jZch4lMY)
+- [AWS re:Invent 2019: Best practices for authoring AWS CloudFormation (DOP302-R1)](https://www.youtube.com/watch?v=bJHHQM7GGro)
 - [CFN lint for VSCode](https://github.com/awslabs/aws-cfn-lint-visual-studio-code)
 - [Use AWS CloudFormer to create CloudFormation Template](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-using-cloudformer.html)
 - [Import Existing Resources into a CloudFormation Stack](https://aws.amazon.com/blogs/aws/new-import-existing-resources-into-a-cloudformation-stack/)
