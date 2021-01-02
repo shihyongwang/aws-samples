@@ -40,17 +40,17 @@ Mappings:
     VPC:
       CIDR: "10.10.0.0/16"
     Public1:
-      CIDR: "10.10.10.0/24"
-    Public2:
-      CIDR: "10.10.20.0/24"
-    Private1:
       CIDR: "10.10.11.0/24"
-    Private2:
-      CIDR: "10.10.21.0/24"
-    Private3:
+    Public2:
       CIDR: "10.10.12.0/24"
-    Private4:
+    Private1:
+      CIDR: "10.10.21.0/24"
+    Private2:
       CIDR: "10.10.22.0/24"
+    Private3:
+      CIDR: "10.10.31.0/24"
+    Private4:
+      CIDR: "10.10.32.0/24"
 
   # This mapping accounts for the scenario when certain AZs
   # are not available to use (this differs on a per account
@@ -690,7 +690,6 @@ Resources:
         Ref: "NATGateway2"
       RouteTableId:
         Ref: "PrivateRouteTable2"
-
 
   PrivateSubnetRouteTableAssociation1:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
