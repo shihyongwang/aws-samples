@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
 
-Description: "Create VPC, AZ*2, subnet*6, IGW, NAT*2."
+Description: "Create VPC, AZ*2, subnet*6, IGW, NATGW*2."
 
 
 Metadata:
@@ -29,6 +29,9 @@ Parameters:
     Type: String
   DeployTimestamp:
     Description: The date-like tag when deploy (say '20160707-1109')
+    Type: String
+  StackOwner:
+    Description: The stack owner name (say 'sywang')
     Type: String
 
 
@@ -114,6 +117,10 @@ Resources:
             - - !Ref "VPCName"
               - '-'
               - !Ref "DeployTimestamp"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
 
   PublicSubnet1:
     Type: "AWS::EC2::Subnet"
@@ -149,6 +156,10 @@ Resources:
         -
           Key: "Network"
           Value: "Public"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId:
         Ref: "VPC"
 
@@ -186,6 +197,10 @@ Resources:
         -
           Key: "Network"
           Value: "Public"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId:
         Ref: "VPC"
 
@@ -222,6 +237,10 @@ Resources:
         -
           Key: "Network"
           Value: "Private"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId:
         Ref: "VPC"
 
@@ -258,6 +277,10 @@ Resources:
         -
           Key: "Network"
           Value: "Private"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId:
         Ref: "VPC"
 
@@ -294,6 +317,10 @@ Resources:
         -
           Key: "Network"
           Value: "Private"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId:
         Ref: "VPC"
 
@@ -330,6 +357,10 @@ Resources:
         -
           Key: "Network"
           Value: "Private"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId:
         Ref: "VPC"
 
@@ -357,6 +388,10 @@ Resources:
         -
           Key: "Network"
           Value: "Public"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
 
   GatewayToInternet:
     Type: "AWS::EC2::VPCGatewayAttachment"
@@ -389,6 +424,10 @@ Resources:
             - - !Ref "VPCName"
               - '-route-table-pub-'
               - !Ref "DeployTimestamp"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId:
         Ref: "VPC"
 
@@ -441,6 +480,10 @@ Resources:
         -
           Key: "Network"
           Value: "Public"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId:
         Ref: "VPC"
 
@@ -507,6 +550,10 @@ Resources:
             - - !Ref "VPCName"
               - '-EIP1-'
               - !Ref "DeployTimestamp"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
 
   ElasticIP2:
     Type: "AWS::EC2::EIP"
@@ -524,6 +571,10 @@ Resources:
             - - !Ref "VPCName"
               - '-EIP2-'
               - !Ref "DeployTimestamp"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
 
   NATGateway1:
     Type: "AWS::EC2::NatGateway"
@@ -546,6 +597,10 @@ Resources:
             - - !Ref "VPCName"
               - '-NAT1-'
               - !Ref "DeployTimestamp"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
 
   NATGateway2:
     Type: "AWS::EC2::NatGateway"
@@ -568,6 +623,10 @@ Resources:
             - - !Ref "VPCName"
               - '-NAT2-'
               - !Ref "DeployTimestamp"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
 
 
   PrivateRouteTable1:
@@ -585,6 +644,10 @@ Resources:
             - - !Ref "VPCName"
               - '-route-table-priv_1-'
               - !Ref "DeployTimestamp"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId:
         Ref: "VPC"
 
@@ -603,6 +666,10 @@ Resources:
             - - !Ref "VPCName"
               - '-route-table-priv_2-'
               - !Ref "DeployTimestamp"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId:
         Ref: "VPC"
 
