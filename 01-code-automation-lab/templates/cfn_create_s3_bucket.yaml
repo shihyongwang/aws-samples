@@ -33,6 +33,10 @@ Parameters:
     Description: The date-like tag when deploy (say '20160707')
     Type: String
 
+  StackOwner:
+    Description: The stack owner name (say 'sywang')
+    Type: String
+
 
 Resources:
 
@@ -104,6 +108,10 @@ Resources:
         -
           Key: Name
           Value: !Join ["-", [!Ref "AWS::StackName", !Ref "DeployTimestamp"]]
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
 
 Outputs:
 
