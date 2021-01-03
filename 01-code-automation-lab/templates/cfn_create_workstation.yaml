@@ -36,10 +36,9 @@ Parameters:
     Type: 'AWS::EC2::Subnet::Id'
 
   InstanceType:
-    Description: Instance size for the Workstation Host (default - t3a.micro)
+    Description: Instance size for the Workstation Host (default - t2.micro)
     Type: String
     AllowedValues:
-      - t2.nano
       - t2.micro
       - t2.small
       - t2.medium
@@ -53,14 +52,20 @@ Parameters:
       - t3a.micro
       - t3a.small
       - t3a.medium
-    Default: t3a.micro
+      - t4g.micro
+      - t4g.small
+      - t4g.medium
+      - t4g.large
+      - t4g.xlarge
+      - t4g.2xlarge
+    Default: t2.micro
 
   SourceCidr:
     Description: What is the CIDR Block of IPv4 IP addresses allowed to access your workstation SSH?
     Type: String
     AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/([0-9]|[1-2][0-9]|3[0-2]))?$"
     ConstraintDescription: The value must be valid IPv4 CIDR block. (0.0.0.0/0 is NOT preferred)
-    Default: 10.0.0.0/8
+    Default: 10.10.0.0/16
 
   SshPort:
     Description: What port number would you like to use to connect to your host over SSH?
@@ -82,13 +87,19 @@ Parameters:
     AllowedValues:
       - standard
       - io1
+      - io2
       - gp2
+      - gp3
       - sc1
       - st1
     ConstraintDescription: Must be a valid EBS volume type.
 
   DeployTimestamp:
     Description: The date-like tag when deploy (say '20200707-v1')
+    Type: String
+
+  StackOwner:
+    Description: The stack owner name (say 'sywang')
     Type: String
 
 
@@ -269,7 +280,12 @@ Resources:
             - - !Ref "AWS::StackName"
               - '-workstation-'
               - !Ref "DeployTimestamp"
-          PropagateAtLaunch: "true"
+          PropagateAtLaunch: true
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
+          PropagateAtLaunch: true
       VPCZoneIdentifier:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
@@ -288,6 +304,10 @@ Resources:
             - - !Ref "AWS::StackName"
               - '-sg-'
               - !Ref "DeployTimestamp"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VpcId: !Ref VpcId
 
   # Security Group Ingress rule for SSH access to Workstation Host
