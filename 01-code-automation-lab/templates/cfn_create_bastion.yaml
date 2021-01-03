@@ -41,20 +41,14 @@ Parameters:
     Description: Instance size for the Bastion Host (default - t2.micro)
     Type: String
     AllowedValues:
-      - t2.nano
       - t2.micro
       - t2.small
-      - t2.medium
-      - t2.large
       - t3.micro
       - t3.small
-      - t3.medium
-      - t3.large
-      - t3.xlarge
-      - t3.2xlarge
       - t3a.micro
       - t3a.small
-      - t3a.medium
+      - t4g.micro
+      - t4g.small
     Default: t2.micro
 
   SourceCidr:
@@ -72,6 +66,10 @@ Parameters:
 
   DeployTimestamp:
     Description: The date-like tag when deploy (say '20200707-v1')
+    Type: String
+
+  StackOwner:
+    Description: The stack owner name (say 'sywang')
     Type: String
 
 
@@ -108,7 +106,7 @@ Metadata:
       InstanceType:
         default: "Instance Type"
       SourceCidr:
-        default: "Origin CIDR block"
+        default: "Origin CIDR block (e.g., 0.0.0.0/0)"
       SshPort:
         default: "SSH Port Number"
 
@@ -127,6 +125,8 @@ Resources:
           Action:
           - sts:AssumeRole
       Description: based on https://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-provision-user.html
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
       Path: "/"
       RoleName:
         Fn::Join:
@@ -205,7 +205,7 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
-          yum install -y telnet tmux
+          yum install -y telnet tmux amazon-ssm-agent
 
   BastionASG:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -227,7 +227,12 @@ Resources:
             - - !Ref "AWS::StackName"
               - '-Bastion-'
               - !Ref "DeployTimestamp"
-          PropagateAtLaunch: "true"
+          PropagateAtLaunch: true
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
+          PropagateAtLaunch: true
       VPCZoneIdentifier:
         - !Ref Subnet1
         - !Ref Subnet2
@@ -247,6 +252,10 @@ Resources:
             - - !Ref "AWS::StackName"
               - '-sg-'
               - !Ref "DeployTimestamp"
+        -
+          Key: "Owner"
+          Value:
+            Ref: "StackOwner"
 
   # Security Group Ingress rule for SSH access to Bastion Host
   SecurityGroupSshIngressRule:
@@ -258,5 +267,10 @@ Resources:
       IpProtocol: "tcp"
       ToPort: !Ref SshPort
 
+
+Outputs:
+  SessionManagementListUrl:
+    Description: The URL to the Session Management Console listing all instances it is aware of
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/systems-manager/session-manager/start-session?region=${AWS::Region}
 
 ## @ref https://github.com/aws-quickstart/quickstart-linux-bastion/blob/master/templates/linux-bastion-master.template
