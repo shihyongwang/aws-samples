@@ -90,7 +90,7 @@ At `Step 1`, specify stack details as
 
 5. Run the CLI `aws` to build an AMI image.
 ```bash
-$ aws ec2 create-image --instance-id i-YOUR_EC2_ID --name "sywang-golden-20200830" --description "Base AMI for CodeDeploy" --no-reboot
+$ aws ec2 create-image --instance-id i-YOUR_EC2_ID --name "sywang-golden-20200830" --description "Base AMI for CodeDeploy" --no-reboot --region YOUR_REGION
 ```
 
 6. You will get the AMI ID from the output.
