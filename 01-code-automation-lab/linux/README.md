@@ -2,10 +2,15 @@
 1. Read the [appspec.yml user guide](https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file.html) , event hooks at this case run in the following order:
 <img alt="CodeDeploy hook" src="https://docs.aws.amazon.com/codedeploy/latest/userguide/images/lifecycle-event-order-blue-green.png">
 
-2. Edit the file `bin/newversion.sh` to meet your environment. Then run it. You should get the output like
+2. Make sure you already with proper configuration.
 ```bash
-To deploy with this revision, run:
-aws deploy create-deployment --application-name YOU_APP_NAME --s3-location bucket=YOUR_BUCKET,key=newversion.zip,bundleType=zip,eTag=4cd3849f991c6291642ee8f2a2690412 --deployment-group-name <deployment-group-name> --deployment-config-name <deployment-config-name> --description <description>
+$ aws configure list
+$ aws sts get-caller-identity
+```
+
+3. Edit the file `bin/newversion.sh` to meet your environment. Then deploy with this revision via
+```bash
+$ aws deploy create-deployment --application-name YOU_APP_NAME --s3-location bucket=YOUR_BUCKET,key=newversion.zip,bundleType=zip,eTag=4cd3849f991c6291642ee8f2a2690412 --deployment-group-name <deployment-group-name> --deployment-config-name <deployment-config-name> --description <description>
 ```
 
 3. But we'd like to deploy application via AWS console `CodeDeploy` --> `Applicaitons` --> `Deployment groups`, then choose which deployment group to `Edit`
