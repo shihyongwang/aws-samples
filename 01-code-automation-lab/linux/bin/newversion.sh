@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 ## The S3 bucket where you will upload the new staffs.
 S3Bucket=sywang-codedeploy-us-east-1
@@ -13,4 +13,7 @@ aws deploy push \
     --description "new version (${CurrentTime})" \
     --ignore-hidden-files \
     --s3-location s3://${S3Bucket}/newversion.zip \
-    --source /home/ec2-user/linux
+    --source ../../linux
+
+test $? -eq 0 && echo "\nPlease forget the above command, but goto AWS Console for following deployment...."
+
