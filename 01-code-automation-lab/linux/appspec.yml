@@ -2,18 +2,30 @@ version: 0.0
 
 os: linux
 
+## @ref https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-files.html
+## @ref https://docs.aws.amazon.com/codedeploy/latest/userguide/application-revisions-appspec-file.html#add-appspec-file-server
 files:
   - source: /index.html
     destination: /var/www/html/
   - source: phpinfo.php
     destination: /var/www/html/internal/
 
+
+permissions:
+  - object: /var/www/html/index.html
+    owner: apache
+    mode: 664
+  - object: /var/www/html/internal/phpinfo.php
+    owner: apache
+    mode: 664
+
+
 ## @ref https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#appspec-hooks-server
 hooks:
   ## Before the application revision is downloaded.
   ApplicationStop:
     - location: bin/stop_server.sh
-      timeout: 300
+      timeout: 30
       runas: root
 
   ## For preinstall tasks, such as uncompress files.
@@ -25,7 +37,7 @@ hooks:
   ## for tasks such as configuring your application or changing file permissions.
   AfterInstall:
     - location: bin/start_server.sh
-      timeout: 300
+      timeout: 30
       runas: root
 
   ## To restart services that were stopped during ApplicationStop.
@@ -34,6 +46,6 @@ hooks:
   ## To verify the deployment was completed successfully. This is the last deployment lifecycle event.
   ValidateService:
     - location: bin/check_url.sh
-      timeout: 300
+      timeout: 30
       runas: root
 
