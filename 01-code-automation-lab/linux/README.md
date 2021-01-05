@@ -15,8 +15,9 @@ $ aws deploy create-deployment --application-name YOU_APP_NAME --s3-location buc
 ```
 
 4. But we'd like to deploy application via **AWS console** (rather than the above command) `CodeDeploy` --> `Applicaitons` --> `Deployment groups`, then choose which deployment group to `Edit`
-<img width="812" alt="Edit the deployment group" src="https://user-images.githubusercontent.com/13880010/91653583-be022780-ead4-11ea-9e01-043a7e322730.png">
-<img width="811" alt="Edit the deployment group" src="https://user-images.githubusercontent.com/13880010/91652877-b2f7c900-eacd-11ea-82dd-301b15fdf7ca.png">
+<img width="812" alt="Edit the deployment group - type & env" src="https://user-images.githubusercontent.com/13880010/91653583-be022780-ead4-11ea-9e01-043a7e322730.png">
+<img width="811" alt="Edit the deployment group - lb" src="https://user-images.githubusercontent.com/13880010/91652877-b2f7c900-eacd-11ea-82dd-301b15fdf7ca.png">
+<img width="721" alt="Edit the deployment group - deploy behavior" src="https://user-images.githubusercontent.com/13880010/103603811-71c76800-4f4a-11eb-99c6-217501284f38.png">
 
 5. If every parameters seems fine, then click `Create deployment`
 <img width="1048" alt="Create deployment" src="https://user-images.githubusercontent.com/13880010/91652934-4f21d000-eace-11ea-8ae4-124ba9fa1887.png">
