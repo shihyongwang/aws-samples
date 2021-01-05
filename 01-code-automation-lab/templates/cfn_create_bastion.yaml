@@ -203,7 +203,7 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
-          yum install -y telnet tmux amazon-ssm-agent
+          yum install -y telnet tmux amazon-ssm-agent git
 
   BastionASG:
     Type: AWS::AutoScaling::AutoScalingGroup
