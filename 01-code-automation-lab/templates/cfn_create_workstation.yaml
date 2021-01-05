@@ -106,8 +106,7 @@ Parameters:
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
+      - Label:
           default: "Network Parameters"
         Parameters:
           - VpcId
@@ -115,8 +114,7 @@ Metadata:
           - PrivateSubnet2
           - SourceCidr
           - SshPort
-      -
-        Label:
+      - Label:
           default: "Host Parameters"
         Parameters:
           - KeyPair
@@ -259,6 +257,7 @@ Resources:
           #chmod +x ./install
           #./install auto
           #service codedeploy-agent restart
+          echo '<HTML><BODY>Hello!</BODY></HTML>' > /var/www/html/index.html
 
   WorkstationASG:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -281,8 +280,7 @@ Resources:
               - '-workstation-'
               - !Ref "DeployTimestamp"
           PropagateAtLaunch: true
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
           PropagateAtLaunch: true
@@ -297,15 +295,13 @@ Resources:
       GroupDescription: Workstation Host Security Group
       GroupName: !Join ["-", [ !Ref "AWS::StackName", "WorkstationHostSecurityGroup", !Ref "DeployTimestamp"]]
       Tags:
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "AWS::StackName"
               - '-sg-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId: !Ref VpcId

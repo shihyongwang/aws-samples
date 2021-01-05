@@ -76,8 +76,7 @@ Parameters:
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
+      - Label:
           default: "Network Parameters"
         Parameters:
           - VpcId
@@ -85,8 +84,7 @@ Metadata:
           - Subnet2
           - SourceCidr
           - SshPort
-      -
-        Label:
+      - Label:
           default: "Host Parameters"
         Parameters:
           - KeyPair
@@ -228,8 +226,7 @@ Resources:
               - '-Bastion-'
               - !Ref "DeployTimestamp"
           PropagateAtLaunch: true
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
           PropagateAtLaunch: true
@@ -245,15 +242,13 @@ Resources:
       VpcId: !Ref VpcId
       GroupName: !Join ["-", [ !Ref "AWS::StackName", "BastionSecurityGroup", !Ref "DeployTimestamp"]]
       Tags:
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "AWS::StackName"
               - '-sg-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
 

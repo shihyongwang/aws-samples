@@ -71,9 +71,11 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       Tags:
-        -
-          Key: Name
+        - Key: Name
           Value: !Join ["-", [!Ref "AWS::StackName", !Ref "DeployTimestamp"]]
+        - Key: "Owner"
+          Value:
+            Ref: "StackOwner"
       VersioningConfiguration:
         Status: Enabled
 
@@ -93,8 +95,7 @@ Resources:
               DaysAfterInitiation: 7
             Status: Enabled
             Transitions:
-              -
-                StorageClass: GLACIER
+              - StorageClass: GLACIER
                 TransitionInDays: 30
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
@@ -102,14 +103,11 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       Tags:
-        -
-          Key: Description
+        - Key: Description
           Value: S3 Access Logs
-        -
-          Key: Name
+        - Key: Name
           Value: !Join ["-", [!Ref "AWS::StackName", !Ref "DeployTimestamp"]]
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
 

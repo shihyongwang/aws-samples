@@ -102,23 +102,19 @@ Resources:
       EnableDnsHostnames: "true"
       EnableDnsSupport: "true"
       Tags:
-        -
-          Key: "Application"
+        - Key: "Application"
           Value:
             Ref: "AWS::StackName"
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
               - '-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
 
@@ -136,16 +132,13 @@ Resources:
           - "CIDR"
       MapPublicIpOnLaunch: "true"
       Tags:
-        -
-          Key: "Application"
+        - Key: "Application"
           Value:
             Ref: "AWS::StackName"
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
@@ -153,11 +146,9 @@ Resources:
               - !Select [ 0, !FindInMap [ "AZRegions", !Ref "AWS::Region", "AZs" ] ]
               - '-pub-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Network"
+        - Key: "Network"
           Value: "Public"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId:
@@ -177,16 +168,13 @@ Resources:
           - "CIDR"
       MapPublicIpOnLaunch: "true"
       Tags:
-        -
-          Key: "Application"
+        - Key: "Application"
           Value:
             Ref: "AWS::StackName"
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
@@ -194,11 +182,9 @@ Resources:
               - !Select [ 1, !FindInMap [ "AZRegions", !Ref "AWS::Region", "AZs" ] ]
               - '-pub-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Network"
+        - Key: "Network"
           Value: "Public"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId:
@@ -217,16 +203,13 @@ Resources:
           - "Private1"
           - "CIDR"
       Tags:
-        -
-          Key: "Application"
+        - Key: "Application"
           Value:
             Ref: "AWS::StackName"
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
@@ -234,11 +217,9 @@ Resources:
               - !Select [ 0, !FindInMap [ "AZRegions", !Ref "AWS::Region", "AZs" ] ]
               - '-priv_1-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Network"
+        - Key: "Network"
           Value: "Private"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId:
@@ -257,16 +238,13 @@ Resources:
           - "Private2"
           - "CIDR"
       Tags:
-        -
-          Key: "Application"
+        - Key: "Application"
           Value:
             Ref: "AWS::StackName"
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
@@ -274,11 +252,9 @@ Resources:
               - !Select [ 1, !FindInMap [ "AZRegions", !Ref "AWS::Region", "AZs" ] ]
               - '-priv_1-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Network"
+        - Key: "Network"
           Value: "Private"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId:
@@ -297,16 +273,13 @@ Resources:
           - "Private3"
           - "CIDR"
       Tags:
-        -
-          Key: "Application"
+        - Key: "Application"
           Value:
             Ref: "AWS::StackName"
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
@@ -314,11 +287,9 @@ Resources:
               - !Select [ 0, !FindInMap [ "AZRegions", !Ref "AWS::Region", "AZs" ] ]
               - '-priv_2-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Network"
+        - Key: "Network"
           Value: "Private"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId:
@@ -337,16 +308,13 @@ Resources:
           - "Private4"
           - "CIDR"
       Tags:
-        -
-          Key: "Application"
+        - Key: "Application"
           Value:
             Ref: "AWS::StackName"
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
@@ -354,11 +322,9 @@ Resources:
               - !Select [ 1, !FindInMap [ "AZRegions", !Ref "AWS::Region", "AZs" ] ]
               - '-priv_2-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Network"
+        - Key: "Network"
           Value: "Private"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId:
@@ -370,26 +336,21 @@ Resources:
     Type: "AWS::EC2::InternetGateway"
     Properties:
       Tags:
-        -
-          Key: "Application"
+        - Key: "Application"
           Value:
             Ref: "AWS::StackName"
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
               - '-IGW-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Network"
+        - Key: "Network"
           Value: "Public"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
 
@@ -406,26 +367,21 @@ Resources:
     Type: "AWS::EC2::RouteTable"
     Properties:
       Tags:
-        -
-          Key: "Application"
+        - Key: "Application"
           Value:
             Ref: "AWS::StackName"
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Network"
+        - Key: "Network"
           Value: "Public"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
               - '-route-table-pub-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId:
@@ -462,26 +418,21 @@ Resources:
     Type: "AWS::EC2::NetworkAcl"
     Properties:
       Tags:
-        -
-          Key: "Application"
+        - Key: "Application"
           Value:
             Ref: "AWS::StackName"
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
               - '-nacl-pub-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Network"
+        - Key: "Network"
           Value: "Public"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId:
@@ -539,19 +490,16 @@ Resources:
     Properties:
       Domain: "vpc"
       Tags:
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
               - '-EIP1-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
 
@@ -560,19 +508,16 @@ Resources:
     Properties:
       Domain: "vpc"
       Tags:
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
               - '-EIP2-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
 
@@ -586,19 +531,16 @@ Resources:
       SubnetId:
         Ref: "PublicSubnet1"
       Tags:
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
               - '-NAT1-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
 
@@ -612,19 +554,16 @@ Resources:
       SubnetId:
         Ref: "PublicSubnet2"
       Tags:
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
               - '-NAT2-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
 
@@ -633,19 +572,16 @@ Resources:
     Type: "AWS::EC2::RouteTable"
     Properties:
       Tags:
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
               - '-route-table-priv_1-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId:
@@ -655,19 +591,16 @@ Resources:
     Type: "AWS::EC2::RouteTable"
     Properties:
       Tags:
-        -
-          Key: "Environment"
+        - Key: "Environment"
           Value:
             Ref: "MyEnvironment"
-        -
-          Key: "Name"
+        - Key: "Name"
           Value: !Join
             - ''
             - - !Ref "VPCName"
               - '-route-table-priv_2-'
               - !Ref "DeployTimestamp"
-        -
-          Key: "Owner"
+        - Key: "Owner"
           Value:
             Ref: "StackOwner"
       VpcId:
