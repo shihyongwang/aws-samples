@@ -15,7 +15,7 @@ Metadata:
 
 Parameters:
   VPCName:
-    Default: "ecomm_vpc"
+    Default: "demo_vpc"
     Description: The name of the VPC being created.
     Type: String
   MyEnvironment:
